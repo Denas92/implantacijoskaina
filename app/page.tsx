@@ -1,3 +1,4 @@
+import { ImplantCalculator } from "@/components/calculator/ImplantCalculator";
 import { Hero } from "@/components/sections/Hero";
 import { TrustSignals } from "@/components/sections/TrustSignals";
 import { ContactForm } from "@/components/ui/ContactForm";
@@ -19,12 +20,11 @@ export default function HomePage() {
             Implanto kainos skaičiuoklė
           </h2>
           <p className="mt-3 max-w-2xl text-muted">
-            Interaktyvus vedlys (dantų schema, žingsniai, sąmata) bus čia — sekantis etapas pagal
-            jūsų brief’ą.
+            Atsakykite į kelis klausimus — parodysime orientacinę sąmatą su eilutėmis pagal jūsų brief’ą.
+            Tiksli kaina po gydytojo konsultacijos.
           </p>
-          <div className="mt-8 rounded-xl border border-dashed border-border bg-white/80 p-10 text-center text-sm text-muted">
-            Komponentas <code className="rounded bg-surface-alt px-1.5 py-0.5">ImplantCalculator</code>{" "}
-            — ruošiamas
+          <div className="mt-10">
+            <ImplantCalculator />
           </div>
         </div>
       </section>
