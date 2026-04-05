@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TrackedPhoneLink } from "@/components/analytics/TrackedPhoneLink";
 import { ContactForm } from "@/components/ui/ContactForm";
 import { getTelDisplay, getTelHref } from "@/lib/site";
 
@@ -20,9 +21,12 @@ export default function KontaktaiPage() {
         <div className="space-y-6 text-sm">
           <div>
             <p className="font-semibold text-primary-dark">Telefonas</p>
-            <a href={getTelHref()} className="mt-1 block font-mono text-lg text-primary hover:underline">
+            <TrackedPhoneLink
+              href={getTelHref()}
+              className="mt-1 block font-mono text-lg text-primary hover:underline"
+            >
               {getTelDisplay()}
-            </a>
+            </TrackedPhoneLink>
           </div>
           <div>
             <p className="font-semibold text-primary-dark">Adresas</p>
@@ -33,7 +37,7 @@ export default function KontaktaiPage() {
             <p className="mt-1 text-muted">Pagal klinikos tvarkaraštį</p>
           </div>
         </div>
-        <ContactForm />
+        <ContactForm formLocation="contact_page" />
       </div>
 
       <div className="mt-16 aspect-video w-full rounded-xl border border-dashed border-border bg-surface-alt" />

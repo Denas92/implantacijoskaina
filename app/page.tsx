@@ -1,4 +1,5 @@
 import { ImplantCalculator } from "@/components/calculator/ImplantCalculator";
+import { TrackedPhoneLink } from "@/components/analytics/TrackedPhoneLink";
 import { Hero } from "@/components/sections/Hero";
 import { TrustSignals } from "@/components/sections/TrustSignals";
 import { ContactForm } from "@/components/ui/ContactForm";
@@ -92,15 +93,15 @@ export default function HomePage() {
                 paskambinti arba parašyti WhatsApp.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-                <a
+                <TrackedPhoneLink
                   href={getTelHref()}
                   className="font-mono text-lg font-semibold text-primary hover:text-primary-light"
                 >
                   {getTelDisplay()}
-                </a>
+                </TrackedPhoneLink>
               </div>
             </div>
-            <ContactForm />
+            <ContactForm formLocation="homepage" />
           </div>
         </div>
       </section>

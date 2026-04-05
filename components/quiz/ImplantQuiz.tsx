@@ -1,15 +1,20 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { QUIZ_STEPS } from "./quizData";
-import type { QuizAnswers } from "./quizLogic";
+import { getQuizAnalyticsRecommendation, type QuizAnswers } from "./quizLogic";
 import { QuizQuestion } from "./QuizQuestion";
 import { QuizResult } from "./QuizResult";
+import { pushDataLayer } from "@/lib/analytics";
 
 export function ImplantQuiz() {
+  const pathname = usePathname();
   const [phase, setPhase] = useState<"quiz" | "result">("quiz");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
+  const quizStartedRef = useRef(false);
+  const quizCompleteSentRef = useRef(false);
 
   const currentStep = QUIZ_STEPS[step];
   const selectedForStep = answers[currentStep.id] as string | undefined;
@@ -21,6 +26,10 @@ export function ImplantQuiz() {
 
   const handleSelect = useCallback(
     (value: string) => {
+      if (!quizStartedRef.current) {
+        quizStartedRef.current = true;
+        pushDataLayer({ event: "quiz_start" });
+      }
       setAnswers((prev) => ({ ...prev, [currentStep.id]: value }) as QuizAnswers);
 
       if (currentStep.id === "q1" && value === "none") {
@@ -51,10 +60,25 @@ export function ImplantQuiz() {
   }, [step]);
 
   const handleRetry = useCallback(() => {
+    quizStartedRef.current = false;
     setAnswers({});
     setStep(0);
     setPhase("quiz");
   }, []);
+
+  useEffect(() => {
+    if (phase !== "result") {
+      quizCompleteSentRef.current = false;
+      return;
+    }
+    if (quizCompleteSentRef.current) return;
+    quizCompleteSentRef.current = true;
+    pushDataLayer({
+      event: "quiz_complete",
+      recommendation: getQuizAnalyticsRecommendation(answers),
+      page: pathname ?? "",
+    });
+  }, [phase, answers, pathname]);
 
   if (phase === "result") {
     return <QuizResult answers={answers} onRetry={handleRetry} />;

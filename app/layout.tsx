@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { DM_Mono, Playfair_Display, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
+import {
+  GoogleTagManagerNoScript,
+  GoogleTagManagerScripts,
+} from "@/components/analytics/GoogleTagManager";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { StickyCTA } from "@/components/layout/StickyCTA";
@@ -48,6 +52,8 @@ export default function RootLayout({
       <body
         className={`${playfair.variable} ${sourceSans.variable} ${dmMono.variable} min-h-screen flex flex-col`}
       >
+        <GoogleTagManagerScripts />
+        <GoogleTagManagerNoScript />
         <Navigation />
         <main className="flex-1 pb-24 md:pb-0">{children}</main>
         <Footer />

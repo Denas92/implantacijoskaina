@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { pushDataLayer } from "@/lib/analytics";
 
 type FormValues = {
   name: string;
@@ -17,7 +18,14 @@ const interests = [
   { value: "unknown", label: "Nežinau, noriu konsultacijos" },
 ] as const;
 
-export function ContactForm({ id }: { id?: string }) {
+export function ContactForm({
+  id,
+  formLocation = "unknown",
+}: {
+  id?: string;
+  /** GTM `lead_form_submit.form_location` */
+  formLocation?: string;
+}) {
   const [status, setStatus] = useState<"idle" | "loading" | "ok" | "err">("idle");
   const { register, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: { interest: "unknown" },
@@ -32,6 +40,11 @@ export function ContactForm({ id }: { id?: string }) {
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Request failed");
+      pushDataLayer({
+        event: "lead_form_submit",
+        form_location: formLocation,
+        interest: data.interest,
+      });
       setStatus("ok");
       reset({ name: "", phone: "", interest: "unknown" });
     } catch {

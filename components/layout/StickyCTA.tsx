@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { TrackedPhoneLink } from "@/components/analytics/TrackedPhoneLink";
 import { getTelDisplay, getTelHref } from "@/lib/site";
 
 export function StickyCTA() {
@@ -30,23 +31,23 @@ export function StickyCTA() {
           >
             Nemokama konsultacija
           </Link>
-          <a
+          <TrackedPhoneLink
             href={getTelHref()}
             className="rounded-lg border border-border bg-white px-4 py-3 text-sm font-medium text-primary"
           >
             Skambinti
-          </a>
+          </TrackedPhoneLink>
         </div>
       </div>
 
       <div className="pointer-events-none fixed bottom-8 right-6 z-40 hidden md:block">
         <div className="pointer-events-auto flex flex-col items-end gap-2">
-          <a
+          <TrackedPhoneLink
             href={getTelHref()}
             className="rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-primary shadow-card"
           >
             {getTelDisplay()}
-          </a>
+          </TrackedPhoneLink>
           <Link
             href="/kontaktai"
             className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-soft"

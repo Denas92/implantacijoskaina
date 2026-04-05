@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedPhoneLink } from "@/components/analytics/TrackedPhoneLink";
 import { footerLinks, getTelDisplay, getTelHref, siteName } from "@/lib/site";
 
 export function Footer() {
@@ -32,9 +33,9 @@ export function Footer() {
             <p className="text-sm font-semibold text-primary-dark">Kontaktai</p>
             <ul className="mt-3 flex flex-col gap-2 text-sm text-muted">
               <li>
-                <a href={getTelHref()} className="hover:text-primary">
+                <TrackedPhoneLink href={getTelHref()} className="hover:text-primary">
                   {getTelDisplay()}
-                </a>
+                </TrackedPhoneLink>
               </li>
               <li>Vilnius</li>
             </ul>

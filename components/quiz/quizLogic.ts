@@ -196,3 +196,17 @@ export function buildQuizResult(answers: QuizAnswers): QuizComputedResult {
       "Orientacinė 1 implanto sąmata pagal jūsų nurodytą prioritetą (vienas žandikaulis, be komplikacijų scenarijaus). Tiksli suma po 3D diagnostikos.",
   };
 }
+
+/** GTM `quiz_complete.recommendation` (brief pavyzdys: premium_flapless) */
+export function getQuizAnalyticsRecommendation(answers: QuizAnswers): string {
+  try {
+    const r = buildQuizResult(answers);
+    if (r.variant === "all_good") return "no_implant_needed";
+    const parts: string[] = [r.recommendedTier];
+    if (r.showFlapless) parts.push("flapless");
+    if (r.showChronicDisclaimer) parts.push("chronic");
+    return parts.join("_");
+  } catch {
+    return "incomplete";
+  }
+}

@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalculatorStep } from "./CalculatorStep";
 import { CalculatorResult } from "./CalculatorResult";
+import { pushDataLayer } from "@/lib/analytics";
 import {
   type AllOnXFinalOption,
   type CalculationResult,
@@ -64,6 +65,9 @@ export function ImplantCalculator() {
   const [stack, setStack] = useState<Phase[]>(["scope"]);
   const phase = stack[stack.length - 1];
 
+  const calcStartedRef = useRef(false);
+  const lastCompleteKeyRef = useRef<string | null>(null);
+
   const [toothCount, setToothCount] = useState(2);
   const [singleJaw, setSingleJaw] = useState(true);
   const [position, setPosition] = useState<ToothPosition>("mixed");
@@ -82,6 +86,8 @@ export function ImplantCalculator() {
   }, []);
 
   const startOver = useCallback(() => {
+    calcStartedRef.current = false;
+    lastCompleteKeyRef.current = null;
     setStack(["scope"]);
     setToothCount(2);
     setSingleJaw(true);
@@ -91,6 +97,12 @@ export function ImplantCalculator() {
     setAllonImplants(4);
     setAllonStraumann(false);
     setAllonFinal("titanium_zirconia");
+  }, []);
+
+  const markCalculatorStart = useCallback(() => {
+    if (calcStartedRef.current) return;
+    calcStartedRef.current = true;
+    pushDataLayer({ event: "calculator_start" });
   }, []);
 
   const result: CalculationResult | null = useMemo(() => {
@@ -124,6 +136,48 @@ export function ImplantCalculator() {
     allonImplants,
     allonStraumann,
     allonFinal,
+  ]);
+
+  useEffect(() => {
+    if (phase !== "result") {
+      lastCompleteKeyRef.current = null;
+      return;
+    }
+    if (!result) return;
+    const prev = stack[stack.length - 2];
+    let calculator_mode: "partial" | "allon";
+    let implant_type: string;
+    let tooth_count: number;
+    if (prev === "partial-tier") {
+      calculator_mode = "partial";
+      implant_type = tier;
+      tooth_count = toothCount;
+    } else if (prev === "allon-final") {
+      calculator_mode = "allon";
+      implant_type = `all_on_${allonImplants}_${allonStraumann ? "straumann" : "standard"}`;
+      tooth_count = allonJaws * allonImplants;
+    } else {
+      return;
+    }
+    const key = `${prev}-${result.total}`;
+    if (lastCompleteKeyRef.current === key) return;
+    lastCompleteKeyRef.current = key;
+    pushDataLayer({
+      event: "calculator_complete",
+      implant_type,
+      tooth_count,
+      estimated_total: result.total,
+      calculator_mode,
+    });
+  }, [
+    phase,
+    result,
+    stack,
+    tier,
+    toothCount,
+    allonJaws,
+    allonImplants,
+    allonStraumann,
   ]);
 
   const backFromResult = useCallback(() => {
@@ -170,6 +224,7 @@ export function ImplantCalculator() {
             type="button"
             className={choiceClass(false)}
             onClick={() => {
+              markCalculatorStart();
               setToothCount(1);
               setStack(["scope", "partial-position"]);
             }}
@@ -180,7 +235,10 @@ export function ImplantCalculator() {
           <button
             type="button"
             className={choiceClass(false)}
-            onClick={() => setStack(["scope", "partial-multi"])}
+            onClick={() => {
+              markCalculatorStart();
+              setStack(["scope", "partial-multi"]);
+            }}
           >
             <span className="font-medium text-primary-dark">2–6 dantys</span>
             <span className="mt-1 block text-sm text-muted">Kelios implantacijos toje pačioje zonoje</span>
@@ -189,6 +247,7 @@ export function ImplantCalculator() {
             type="button"
             className={choiceClass(false)}
             onClick={() => {
+              markCalculatorStart();
               setAllonJaws(1);
               setStack(["scope", "allon-implants"]);
             }}
@@ -200,6 +259,7 @@ export function ImplantCalculator() {
             type="button"
             className={choiceClass(false)}
             onClick={() => {
+              markCalculatorStart();
               setAllonJaws(2);
               setStack(["scope", "allon-implants"]);
             }}

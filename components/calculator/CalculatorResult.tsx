@@ -1,6 +1,10 @@
+"use client";
+
 import type { CalculationResult } from "./calculatorLogic";
 import { formatMoney } from "./calculatorLogic";
 import { Button } from "@/components/ui/Button";
+import { usePathname } from "next/navigation";
+import { pushDataLayer } from "@/lib/analytics";
 
 type Props = {
   result: CalculationResult;
@@ -9,6 +13,8 @@ type Props = {
 };
 
 export function CalculatorResult({ result, onBack, onStartOver }: Props) {
+  const pathname = usePathname();
+
   return (
     <div className="rounded-xl border border-border bg-white p-6 shadow-card sm:p-8">
       <p className="text-xs font-medium uppercase tracking-wider text-muted">Rezultatas</p>
@@ -58,9 +64,21 @@ export function CalculatorResult({ result, onBack, onStartOver }: Props) {
           Užpildyti formą žemiau
         </Button>
       </div>
-      <p className="mt-4 text-center text-xs text-muted">
-        PDF sąmata — netrukus; kol kas užtenka konsultacijos užklausos.
-      </p>
+      <div className="mt-4 flex justify-center">
+        <button
+          type="button"
+          className="text-center text-xs font-medium text-primary underline-offset-2 hover:underline"
+          onClick={() => {
+            pushDataLayer({
+              event: "pdf_download",
+              type: "price_estimate",
+              page: pathname ?? "",
+            });
+          }}
+        >
+          Atsisiųsti sąmatą PDF (netrukus)
+        </button>
+      </div>
 
       <div className="mt-8 flex flex-wrap gap-3 border-t border-border pt-6">
         <button
