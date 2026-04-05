@@ -21,6 +21,7 @@
     "styled-components": "^6.3.12"
   },
   "devDependencies": {
+    "@sanity/types": "^3.68.3",
     "@sanity/vision": "^3.68.3",
     "@types/node": "^20",
     "@types/react": "^18",
