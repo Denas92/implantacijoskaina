@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ImplantQuiz } from "@/components/quiz/ImplantQuiz";
 
 export const metadata: Metadata = {
   title: "Ar man reikia dantų implanto? Nemokamas testas",
@@ -13,9 +14,12 @@ export default function TestasPage() {
         Ar man reikia implanto?
       </h1>
       <p className="mt-4 text-muted">
-        Interaktyvus testas (<code className="rounded bg-surface-alt px-1">ImplantQuiz</code>) —
-        kitas etapas.
+        Septyni trumpi klausimai — be diagnozių, tik orientacija, ką verta aptarti su implantologu. Pabaigoje
+        pamatysite apytikslę vieno implanto kainą pagal jūsų prioritetus.
       </p>
+      <div className="mt-10">
+        <ImplantQuiz />
+      </div>
     </div>
   );
 }
