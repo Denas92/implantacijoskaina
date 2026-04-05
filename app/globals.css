@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1b4d3e;
+  --color-primary-light: #2d7a5f;
+  --color-primary-dark: #0f2e25;
+  --color-accent: #c9a84c;
+  --color-accent-light: #e8d5a0;
+  --color-bg: #fafaf7;
+  --color-bg-alt: #f0ede6;
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b6b6b;
+  --color-border: #e0ddd6;
+  --color-success: #2d7a5f;
+  --color-warning: #d4a843;
+  --color-error: #c4453c;
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-bg)] text-[var(--color-text)] antialiased;
+    font-family: var(--font-body), system-ui, sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading), ui-serif, Georgia, serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .font-mono-nums {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
+}
