@@ -3,17 +3,17 @@ import { createClient, type SanityClient } from "@sanity/client";
 /** API versija — galite palikti šią arba atnaujinti pagal Sanity dokumentaciją */
 const apiVersion = "2024-01-01";
 
-/**
- * Grąžina Sanity klientą arba `null`, jei dar nesate užpildę env (build/deploy nepalūžta).
- * Kai pridėsite užklausas, visada tikrinkite `if (!client)`.
- */
-export function getSanityClient(): SanityClient | null {
-  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+/** Grąžina klientą skaitymui (viešas turinys). ProjectId sutampa su Studio. */
+/** Tas pats projectId kaip Studio (`sanity.config.ts`). */
+const DEFAULT_PROJECT_ID = "9dzpnf19";
+
+export function getSanityClient(): SanityClient {
+  const projectId =
+    process.env.NEXT_PUBLIC_SANITY_PROJECT_ID?.trim() || DEFAULT_PROJECT_ID;
   const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production";
-  if (!projectId?.trim()) return null;
 
   return createClient({
-    projectId: projectId.trim(),
+    projectId,
     dataset,
     apiVersion,
     useCdn: true,

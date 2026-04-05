@@ -10,9 +10,6 @@ function sortedCompetitors(rows: CompetitorRow[]) {
 
 export async function fetchFaqs(): Promise<{ items: FaqItem[]; fromSanity: boolean }> {
   const client = getSanityClient();
-  if (!client) {
-    return { items: fallbackFaqs, fromSanity: false };
-  }
   try {
     const rows = await client.fetch<FaqItem[]>(faqsQuery);
     if (!rows?.length) {
@@ -29,9 +26,6 @@ export async function fetchCompetitors(): Promise<{
   fromSanity: boolean;
 }> {
   const client = getSanityClient();
-  if (!client) {
-    return { rows: sortedCompetitors(fallbackCompetitors), fromSanity: false };
-  }
   try {
     const rows = await client.fetch<CompetitorRow[]>(competitorsQuery);
     if (!rows?.length) {
