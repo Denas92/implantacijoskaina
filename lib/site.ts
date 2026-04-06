@@ -19,12 +19,14 @@ export const footerLinks = [
   { href: "/kontaktai", label: "Kontaktai" },
 ] as const;
 
+const DEFAULT_WA_TEXT =
+  "Sveiki, domina dantų implantacija. Norėčiau sužinoti kainą.";
+
 /** E.164 be +; pvz. 37060000000. Nustatykite .env.local */
-export function getWhatsAppLink(): string {
+export function getWhatsAppLink(presetMessage?: string | null): string {
   const phone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE ?? "37000000000";
-  const text = encodeURIComponent(
-    "Sveiki, domina dantų implantacija. Norėčiau sužinoti kainą.",
-  );
+  const raw = presetMessage?.trim() || DEFAULT_WA_TEXT;
+  const text = encodeURIComponent(raw);
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${text}`;
 }
 

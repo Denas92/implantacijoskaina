@@ -9,6 +9,8 @@ import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { StickyCTA } from "@/components/layout/StickyCTA";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
+import { AppContentProvider } from "@/components/providers/AppContentProvider";
+import { fetchCalculatorEngine, fetchSiteContent } from "@/lib/sanity.fetch";
 import { siteName } from "@/lib/site";
 
 const playfair = Playfair_Display({
@@ -27,6 +29,9 @@ const dmMono = DM_Mono({
   variable: "--font-mono",
 });
 
+/** Sanity turinys — be agresyvaus statinio cache (skaičiuoklė / meniu iš CMS). */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://implantacijoskaina.lt"),
   title: {
@@ -42,11 +47,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [siteContent, calculatorEngine] = await Promise.all([
+    fetchSiteContent(),
+    fetchCalculatorEngine(),
+  ]);
+
   return (
     <html lang="lt">
       <body
@@ -54,11 +64,13 @@ export default function RootLayout({
       >
         <GoogleTagManagerScripts />
         <GoogleTagManagerNoScript />
-        <Navigation />
-        <main className="flex-1 pb-24 md:pb-0">{children}</main>
-        <Footer />
-        <WhatsAppButton />
-        <StickyCTA />
+        <AppContentProvider siteContent={siteContent} calculatorEngine={calculatorEngine}>
+          <Navigation />
+          <main className="flex-1 pb-24 md:pb-0">{children}</main>
+          <Footer />
+          <WhatsAppButton />
+          <StickyCTA />
+        </AppContentProvider>
       </body>
     </html>
   );

@@ -1,11 +1,11 @@
-const items = [
-  { value: "15+", label: "metų patirtis" },
-  { value: "3000+", label: "implantacijų" },
-  { value: "Straumann®", label: "partneris" },
-  { value: "Be pjūvio", label: "metodas" },
-] as const;
+"use client";
+
+import { useAppContent } from "@/components/providers/AppContentProvider";
 
 export function TrustSignals() {
+  const { siteContent } = useAppContent();
+  const items = siteContent.trustSignals;
+
   return (
     <section className="border-b border-border bg-white py-10">
       <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 sm:grid-cols-4 sm:px-6">

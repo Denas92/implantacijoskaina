@@ -1,6 +1,7 @@
 import { visionTool } from "@sanity/vision";
 import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
+import { deskStructure } from "./sanity/structure";
 import { schemaTypes } from "./sanity/schemaTypes";
 
 /** Vienas Sanity projektas visam produktui; galite perrašyti per env (pvz. staging). */
@@ -15,7 +16,7 @@ export default defineConfig({
   title: "implantacijoskaina.lt",
   projectId,
   dataset,
-  plugins: [structureTool(), visionTool()],
+  plugins: [structureTool({ structure: deskStructure }), visionTool()],
   schema: {
     types: schemaTypes,
   },

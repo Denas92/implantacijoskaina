@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
+import { AllOnEducationPage } from "@/components/pages/AllOnEducationPage";
+import { fetchAllOnPage } from "@/lib/sanity.fetch";
 
-export const metadata: Metadata = {
-  title: "All-on-4 kaina Lietuvoje 2026 | Pilno žandikaulio atstatymas",
-  description:
-    "All-on-4 dantų atstatymas — kainos nuo 2 499€ už implantus. Pilna kainų lentelė su visais protezavimo variantais.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await fetchAllOnPage();
+  return {
+    title: data.seo.title,
+    description: data.seo.description,
+    openGraph: {
+      title: data.seo.ogTitle,
+      description: data.seo.ogDescription,
+    },
+  };
+}
 
-export default function AllOn4Page() {
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-      <h1 className="font-heading text-3xl font-semibold text-primary-dark">All-on-4</h1>
-      <p className="mt-4 text-muted">
-        Pilnas kainų breakdown, proceso timeline ir DUK — sekančio etapo darbas.
-      </p>
-    </div>
-  );
+export default async function AllOn4Page() {
+  const data = await fetchAllOnPage();
+  return <AllOnEducationPage data={data} />;
 }

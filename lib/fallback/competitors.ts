@@ -1,4 +1,4 @@
-import type { CompetitorRow } from "@/lib/sanity.types";
+import type { CompetitorRow } from "../sanity.types";
 
 /** Pagal brief lentelę — atnaujinkite per Sanity CMS */
 export const fallbackCompetitors: CompetitorRow[] = [

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { buildQuizResult } from "./quizLogic";
 import type { QuizAnswers } from "./quizLogic";
+import { useAppContent } from "@/components/providers/AppContentProvider";
 import { Button } from "@/components/ui/Button";
 
 type Props = {
@@ -11,19 +12,21 @@ type Props = {
 };
 
 export function QuizResult({ answers, onRetry }: Props) {
+  const { calculatorEngine, siteContent } = useAppContent();
+  const ui = siteContent.quizResultUi;
   let result;
   try {
-    result = buildQuizResult(answers);
+    result = buildQuizResult(answers, calculatorEngine, siteContent.quizEngine);
   } catch {
     return (
       <div className="rounded-xl border border-border bg-white p-8 text-center shadow-card">
-        <p className="text-sm text-muted">Įvyko klaida generuojant rezultatą.</p>
+        <p className="text-sm text-muted">{ui.errorMessage}</p>
         <button
           type="button"
           onClick={onRetry}
           className="mt-4 text-sm font-medium text-primary underline"
         >
-          Bandyti iš naujo
+          {ui.errorRetry}
         </button>
       </div>
     );
@@ -32,20 +35,17 @@ export function QuizResult({ answers, onRetry }: Props) {
   if (result.variant === "all_good") {
     return (
       <div className="rounded-xl border border-border bg-white p-8 shadow-card sm:p-10">
-        <p className="text-xs font-medium uppercase tracking-wider text-primary-light">Rezultatas</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-primary-light">{ui.allGoodKicker}</p>
         <h2 className="mt-3 font-heading text-2xl font-semibold text-primary-dark sm:text-3xl">
-          Puiku — implantai jums šiuo metu greičiausiai nereikalingi
+          {ui.allGoodTitle}
         </h2>
-        <p className="mt-4 text-muted">
-          Jei situacija pasikeistų (trauma, dantis pašalintas ir pan.), visada galite pakartoti testą arba
-          užsiregistruoti profilaktinei apžiūrai.
-        </p>
+        <p className="mt-4 text-muted">{ui.allGoodLead}</p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Button href="/" variant="primary">
-            Grįžti į pradžią
+            {ui.allGoodHome}
           </Button>
           <Button type="button" variant="ghost" className="sm:inline-flex" onClick={onRetry}>
-            Kartoti testą
+            {ui.allGoodRetry}
           </Button>
         </div>
       </div>
@@ -56,7 +56,7 @@ export function QuizResult({ answers, onRetry }: Props) {
 
   return (
     <div className="rounded-xl border border-border bg-white p-8 shadow-card sm:p-10">
-      <p className="text-xs font-medium uppercase tracking-wider text-muted">Jūsų suvestinė</p>
+      <p className="text-xs font-medium uppercase tracking-wider text-muted">{ui.consultKicker}</p>
       <h2 className="mt-3 font-heading text-2xl font-semibold text-primary-dark sm:text-3xl">
         {r.headline}
       </h2>
@@ -64,60 +64,54 @@ export function QuizResult({ answers, onRetry }: Props) {
 
       <ul className="mt-8 space-y-4 text-sm">
         <li className="rounded-lg bg-surface-alt/80 p-4">
-          <span className="font-medium text-primary-dark">Prioritetas</span>
+          <span className="font-medium text-primary-dark">{ui.labelPriority}</span>
           <p className="mt-1 text-muted">{r.priorityLine}</p>
         </li>
         <li className="rounded-lg bg-surface-alt/80 p-4">
-          <span className="font-medium text-primary-dark">Amžiaus kontekstas</span>
+          <span className="font-medium text-primary-dark">{ui.labelAge}</span>
           <p className="mt-1 text-muted">{r.ageInsight}</p>
         </li>
         <li className="rounded-lg border border-primary/15 bg-primary/5 p-4">
-          <span className="font-medium text-primary-dark">Rekomenduojama implantų linija (orientacija)</span>
+          <span className="font-medium text-primary-dark">{ui.labelTier}</span>
           <p className="mt-1 text-muted">{r.tierExplanation}</p>
         </li>
       </ul>
 
       {r.showFlapless ? (
         <div className="mt-6 rounded-lg border border-accent/40 bg-accent-light/30 p-4 text-sm text-primary-dark">
-          <p className="font-medium">Implantacija be pjūvio (flapless)</p>
-          <p className="mt-1 text-muted">
-            Kadangi chirurgija kelia didesnį nerimą, verta aptarti mažiau invazyvius protokolus — dažnai
-            mažiau diskomforto ir greitesnis pasijautimas po procedūros.
-          </p>
+          <p className="font-medium">{ui.flaplessTitle}</p>
+          <p className="mt-1 text-muted">{ui.flaplessBody}</p>
           <Link
             href="/be-pjuvio"
             className="mt-3 inline-block text-sm font-medium text-primary underline-offset-2 hover:underline"
           >
-            Skaityti apie metodą →
+            {ui.flaplessLink}
           </Link>
         </div>
       ) : null}
 
       {r.showChronicDisclaimer ? (
         <div className="mt-6 rounded-lg border border-[var(--color-warning)]/50 bg-[var(--color-warning)]/10 p-4 text-sm">
-          <p className="font-medium text-primary-dark">Lėtinės ligos</p>
-          <p className="mt-1 text-muted">
-            Prieš bet kokį chirurginį planą būtina gydytojo konsultacija ir vaistų / ligų įvertinimas.
-            Implantacija dažnai įmanoma, bet tik individualiai parinkus protokolą.
-          </p>
+          <p className="font-medium text-primary-dark">{ui.chronicTitle}</p>
+          <p className="mt-1 text-muted">{ui.chronicBody}</p>
         </div>
       ) : null}
 
       <div className="mt-8 border-t border-border pt-8">
-        <p className="text-sm font-medium text-primary-dark">Orientacinė 1 implanto kaina</p>
+        <p className="text-sm font-medium text-primary-dark">{ui.orientedPriceLabel}</p>
         <p className="mt-2 font-mono text-3xl font-bold text-primary">{r.orientedTotal}</p>
         <p className="mt-2 text-xs text-muted">{r.orientedNote}</p>
       </div>
 
       <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         <Button href="/kontaktai" variant="primary">
-          Gaukite asmeninę konsultaciją
+          {ui.ctaConsult}
         </Button>
         <Button href="/#skaiciuokle" variant="secondary">
-          Pilna skaičiuoklė
+          {ui.ctaCalculator}
         </Button>
         <Button type="button" variant="ghost" onClick={onRetry}>
-          Kartoti testą
+          {ui.ctaRetry}
         </Button>
       </div>
     </div>

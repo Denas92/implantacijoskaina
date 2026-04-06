@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { navLinks, siteName } from "@/lib/site";
+import { useAppContent } from "@/components/providers/AppContentProvider";
+import { siteName } from "@/lib/site";
 import { Button } from "@/components/ui/Button";
 
 export function Navigation() {
   const [open, setOpen] = useState(false);
+  const { siteContent } = useAppContent();
+  const navLinks = siteContent.navLinks;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/80 bg-surface/95 backdrop-blur-md">

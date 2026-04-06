@@ -1,8 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { TrackedPhoneLink } from "@/components/analytics/TrackedPhoneLink";
-import { footerLinks, getTelDisplay, getTelHref, siteName } from "@/lib/site";
+import { useAppContent } from "@/components/providers/AppContentProvider";
+import { getTelDisplay, getTelHref, siteName } from "@/lib/site";
 
 export function Footer() {
+  const { siteContent } = useAppContent();
+  const footerLinks = siteContent.footerLinks;
+
   return (
     <footer className="border-t border-border bg-surface-alt">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">

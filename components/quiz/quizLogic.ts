@@ -4,6 +4,10 @@ import {
   calculatePartialEstimate,
   formatMoney,
 } from "@/components/calculator/calculatorLogic";
+import type { CalculatorEngineConfig } from "@/lib/calculator/engineTypes";
+import { DEFAULT_CALCULATOR_ENGINE } from "@/lib/fallback/calculatorEngine";
+import { DEFAULT_QUIZ_ENGINE_COPY } from "@/lib/fallback/quizEngineDefaults";
+import type { QuizEngineCopy } from "@/lib/quiz/quizContentTypes";
 
 export type QuizQ1 = "one_few" | "many_missing" | "loose" | "none";
 export type QuizQ2 = "lt_month" | "m1_6" | "gt6m" | "gt_year";
@@ -63,76 +67,23 @@ const Q3_SCORE: Record<QuizQ3, number> = {
   no_denture: 0,
 };
 
-function tierFromQ4(q4: QuizQ4): { tier: ImplantTier; explanation: string } {
-  switch (q4) {
-    case "aesthetics":
-      return {
-        tier: "straumann_slactive",
-        explanation:
-          "Jums svarbi estetika — dažnai renkamasi SLActive paviršių ir kokybišką vainikėlio darbą.",
-      };
-    case "function":
-      return {
-        tier: "standard",
-        explanation:
-          "Jums svarbi kramtymo funkcija — patikimas standartinis implantas su geru planavimu dažnai yra optimalus pasirinkimas.",
-      };
-    case "longevity":
-      return {
-        tier: "straumann_slactive",
-        explanation:
-          "Ilgaamžiškumui rekomenduojame premium liniją su plačiai dokumentuota klinikine istorija.",
-      };
-    case "price":
-      return {
-        tier: "standard",
-        explanation:
-          "Jei pirmiausia svarbi kaina, standartiniai implantai suteikia gerą santykį kainos ir kokybės — vis tiek su individualiu planu.",
-      };
-  }
+function headlineFromAnswers(
+  a: QuizAnswers,
+  score: number,
+  headlines: QuizEngineCopy["headlines"],
+): string {
+  if (a.q1 === "many_missing") return headlines.q1_many_missing;
+  if (a.q1 === "loose") return headlines.q1_loose;
+  if (a.q1 === "one_few" && score >= 28) return headlines.q1_one_few_high;
+  if (a.q1 === "one_few") return headlines.q1_one_few;
+  if (score >= 30) return headlines.score30;
+  return headlines.default;
 }
 
-function positionFromQ4(q4: QuizQ4): ToothPosition {
-  if (q4 === "aesthetics") return "anterior";
-  if (q4 === "function" || q4 === "price") return "posterior";
-  return "mixed";
-}
-
-const AGE_COPY: Record<QuizQ6, string> = {
-  y18_35: "Jūsų amžiuje implantas dažnai yra investicija į dešimtmečius be papildomų kompromisų.",
-  y36_55: "Šiame etape implantacija paprastai yra labai tinkamas laikas — kaulas ir bendra sveikata dažnai dar būna palankūs.",
-  y56_70: "Amžius pats savaime retai yra kliūtis — svarbesnis individualus sveikatos ir burnos būklės vertinimas.",
-  y70plus:
-    "Vyresniame amžiuje sprendimas visada individualus: svarbios lėtinės ligos, vaistai ir kaulo būklė — būtina gydytojo konsultacija.",
-};
-
-function headlineFromAnswers(a: QuizAnswers, score: number): string {
-  if (a.q1 === "many_missing") {
-    return "Verta kalbėti apie viso žandikaulio ar didelės dalies dantų atkūrimą";
-  }
-  if (a.q1 === "loose") {
-    return "Dantų judėjimas reikalauja dėmesio — implantas gali būti viena iš priemonių";
-  }
-  if (a.q1 === "one_few" && score >= 28) {
-    return "Tikėtina, kad implantas yra logiškas sprendimas — verta planuoti konsultaciją";
-  }
-  if (a.q1 === "one_few") {
-    return "Vieno ar kelių dantų atkūrimas implantu dažnai būna tinkamas kelias";
-  }
-  if (score >= 30) {
-    return "Jūsų atsakymai rodo, kad verta profesionalios implantologo konsultacijos";
-  }
-  return "Rekomenduojame individualų vertinimą su gydytoju";
-}
-
-function leadFromScore(score: number): string {
-  if (score >= 32) {
-    return "Trumpas testas negali pakeisti diagnostikos, bet jūsų situacijos požymiai dažnai sutampa su atvejais, kai implantacija būna svarstoma pirmoje eilėje.";
-  }
-  if (score >= 22) {
-    return "Daugelis žmonių su panašiais požymiais renkasi konsultaciją, kad sužinotų visas galimybes — nuo implanto iki alternatyvų.";
-  }
-  return "Net ir švelnesni simptomai verti aiškaus plano: konsultacijoje galėsite ramiai palyginti variantus.";
+function leadFromScore(score: number, leads: QuizEngineCopy["leads"]): string {
+  if (score >= 32) return leads.high;
+  if (score >= 22) return leads.mid;
+  return leads.low;
 }
 
 export function computeQuizScore(a: QuizAnswers): number {
@@ -150,7 +101,11 @@ export function isQuizComplete(answers: QuizAnswers): answers is Required<QuizAn
   );
 }
 
-export function buildQuizResult(answers: QuizAnswers): QuizComputedResult {
+export function buildQuizResult(
+  answers: QuizAnswers,
+  calculatorEngine: CalculatorEngineConfig = DEFAULT_CALCULATOR_ENGINE,
+  engineCopy: QuizEngineCopy = DEFAULT_QUIZ_ENGINE_COPY,
+): QuizComputedResult {
   if (answers.q1 === "none") {
     return { variant: "all_good" };
   }
@@ -161,46 +116,45 @@ export function buildQuizResult(answers: QuizAnswers): QuizComputedResult {
 
   const a = answers;
   const score = computeQuizScore(a);
-  const { tier, explanation } = tierFromQ4(a.q4);
-  const position = positionFromQ4(a.q4);
+  const { tier, explanation } = engineCopy.tierByQ4[a.q4];
+  const position: ToothPosition = engineCopy.positionByQ4[a.q4];
   const showFlapless = a.q5 === "very_afraid" || a.q5 === "somewhat";
   const showChronicDisclaimer = a.q7 === "chronic";
 
-  const est = calculatePartialEstimate({
-    toothCount: 1,
-    toothPosition: position,
-    implantTier: tier,
-    singleJaw: true,
-  });
+  const est = calculatePartialEstimate(
+    {
+      toothCount: 1,
+      toothPosition: position,
+      implantTier: tier,
+      singleJaw: true,
+    },
+    calculatorEngine,
+  );
 
   return {
     variant: "consult",
     score,
-    headline: headlineFromAnswers(a, score),
-    lead: leadFromScore(score),
-    ageInsight: AGE_COPY[a.q6],
-    priorityLine:
-      a.q4 === "aesthetics"
-        ? "Jūsų prioritetas — estetika ir natūrali išvaizda."
-        : a.q4 === "function"
-          ? "Jūsų prioritetas — saugus kramtymas ir komfortas."
-          : a.q4 === "longevity"
-            ? "Jūsų prioritetas — ilgaamžiškumas ir patikimumas."
-            : "Jūsų prioritetas — protinga kaina be nereikalingų permokų.",
+    headline: headlineFromAnswers(a, score, engineCopy.headlines),
+    lead: leadFromScore(score, engineCopy.leads),
+    ageInsight: engineCopy.ageByQ6[a.q6],
+    priorityLine: engineCopy.priorityLineByQ4[a.q4],
     showFlapless,
     showChronicDisclaimer,
     recommendedTier: tier,
     tierExplanation: explanation,
     orientedTotal: formatMoney(est.total),
-    orientedNote:
-      "Orientacinė 1 implanto sąmata pagal jūsų nurodytą prioritetą (vienas žandikaulis, be komplikacijų scenarijaus). Tiksli suma po 3D diagnostikos.",
+    orientedNote: engineCopy.orientedNote,
   };
 }
 
 /** GTM `quiz_complete.recommendation` (brief pavyzdys: premium_flapless) */
-export function getQuizAnalyticsRecommendation(answers: QuizAnswers): string {
+export function getQuizAnalyticsRecommendation(
+  answers: QuizAnswers,
+  calculatorEngine: CalculatorEngineConfig = DEFAULT_CALCULATOR_ENGINE,
+  engineCopy: QuizEngineCopy = DEFAULT_QUIZ_ENGINE_COPY,
+): string {
   try {
-    const r = buildQuizResult(answers);
+    const r = buildQuizResult(answers, calculatorEngine, engineCopy);
     if (r.variant === "all_good") return "no_implant_needed";
     const parts: string[] = [r.recommendedTier];
     if (r.showFlapless) parts.push("flapless");

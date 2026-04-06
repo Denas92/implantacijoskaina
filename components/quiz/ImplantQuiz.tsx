@@ -7,9 +7,11 @@ import { getQuizAnalyticsRecommendation, type QuizAnswers } from "./quizLogic";
 import { QuizQuestion } from "./QuizQuestion";
 import { QuizResult } from "./QuizResult";
 import { pushDataLayer } from "@/lib/analytics";
+import { useAppContent } from "@/components/providers/AppContentProvider";
 
 export function ImplantQuiz() {
   const pathname = usePathname();
+  const { calculatorEngine, siteContent } = useAppContent();
   const [phase, setPhase] = useState<"quiz" | "result">("quiz");
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
@@ -75,10 +77,14 @@ export function ImplantQuiz() {
     quizCompleteSentRef.current = true;
     pushDataLayer({
       event: "quiz_complete",
-      recommendation: getQuizAnalyticsRecommendation(answers),
+      recommendation: getQuizAnalyticsRecommendation(
+        answers,
+        calculatorEngine,
+        siteContent.quizEngine,
+      ),
       page: pathname ?? "",
     });
-  }, [phase, answers, pathname]);
+  }, [phase, answers, pathname, calculatorEngine, siteContent.quizEngine]);
 
   if (phase === "result") {
     return <QuizResult answers={answers} onRetry={handleRetry} />;

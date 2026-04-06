@@ -3,14 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalculatorStep } from "./CalculatorStep";
 import { CalculatorResult } from "./CalculatorResult";
+import { useAppContent } from "@/components/providers/AppContentProvider";
 import { pushDataLayer } from "@/lib/analytics";
 import {
   type AllOnXFinalOption,
   type CalculationResult,
   type ImplantTier,
   type ToothPosition,
-  FINAL_OPTION_META,
-  IMPLANT_PRICES,
   calculateAllOnXEstimate,
   calculatePartialEstimate,
 } from "./calculatorLogic";
@@ -25,34 +24,6 @@ type Phase =
   | "allon-final"
   | "result";
 
-const tierCards: {
-  id: ImplantTier;
-  title: string;
-  subtitle: string;
-  from: string;
-  recommended?: boolean;
-}[] = [
-  {
-    id: "standard",
-    title: "Standartinis",
-    subtitle: "Nobel / Neodent / Megagen / Osstem",
-    from: `nuo ${IMPLANT_PRICES.standard} € / impl.`,
-  },
-  {
-    id: "straumann_sla",
-    title: "Straumann® SLA",
-    subtitle: "Premium Šveicarijos kokybė",
-    from: `nuo ${IMPLANT_PRICES.straumann_sla} € / impl.`,
-  },
-  {
-    id: "straumann_slactive",
-    title: "Straumann® SLActive",
-    subtitle: "Geriausias gijimas, greičiausias rezultatas",
-    from: `nuo ${IMPLANT_PRICES.straumann_slactive} € / impl.`,
-    recommended: true,
-  },
-];
-
 function choiceClass(active: boolean) {
   return `w-full rounded-xl border p-4 text-left transition-colors sm:p-5 ${
     active
@@ -62,6 +33,17 @@ function choiceClass(active: boolean) {
 }
 
 export function ImplantCalculator() {
+  const { calculatorEngine: engine } = useAppContent();
+
+  const tierCards = useMemo(
+    () =>
+      engine.tierCards.map((c) => ({
+        ...c,
+        from: `nuo ${engine.prices.implant[c.id]} € / impl.`,
+      })),
+    [engine],
+  );
+
   const [stack, setStack] = useState<Phase[]>(["scope"]);
   const phase = stack[stack.length - 1];
 
@@ -109,20 +91,26 @@ export function ImplantCalculator() {
     if (phase !== "result") return null;
     const prev = stack[stack.length - 2];
     if (prev === "partial-tier") {
-      return calculatePartialEstimate({
-        toothCount,
-        toothPosition: position,
-        implantTier: tier,
-        singleJaw,
-      });
+      return calculatePartialEstimate(
+        {
+          toothCount,
+          toothPosition: position,
+          implantTier: tier,
+          singleJaw,
+        },
+        engine,
+      );
     }
     if (prev === "allon-final") {
-      return calculateAllOnXEstimate({
-        jaws: allonJaws,
-        implants: allonImplants,
-        useStraumann: allonStraumann,
-        finalOption: allonFinal,
-      });
+      return calculateAllOnXEstimate(
+        {
+          jaws: allonJaws,
+          implants: allonImplants,
+          useStraumann: allonStraumann,
+          finalOption: allonFinal,
+        },
+        engine,
+      );
     }
     return null;
   }, [
@@ -136,6 +124,7 @@ export function ImplantCalculator() {
     allonImplants,
     allonStraumann,
     allonFinal,
+    engine,
   ]);
 
   useEffect(() => {
@@ -508,8 +497,8 @@ export function ImplantCalculator() {
         subtitle="Pasirinkite protezavimo variantą — kaina priklauso nuo medžiagų ir darbo sudėtingumo."
       >
         <div className="grid gap-3">
-          {(Object.keys(FINAL_OPTION_META) as AllOnXFinalOption[]).map((key) => {
-            const m = FINAL_OPTION_META[key];
+          {(Object.keys(engine.finalOptions) as AllOnXFinalOption[]).map((key) => {
+            const m = engine.finalOptions[key];
             return (
               <button
                 key={key}

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "studio": "sanity dev --port 3333"
+    "studio": "sanity dev --port 3333",
+    "sanity:seed": "sanity exec sanity/seed.ts",
+    "sanity:seed:login": "sanity exec sanity/seed.ts --with-user-token"
   },
   "dependencies": {
     "@sanity/client": "^7.20.0",

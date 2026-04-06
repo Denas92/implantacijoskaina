@@ -1,4 +1,4 @@
-import type { FaqItem } from "@/lib/sanity.types";
+import type { FaqItem } from "../sanity.types";
 
 /** Kai Sanity dar neprijungta ar tuščia — pavyzdinis turinys */
 export const fallbackFaqs: FaqItem[] = [

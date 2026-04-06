@@ -18,3 +18,9 @@ export const competitorsQuery = `*[_type == "competitor"] | order(order asc, nam
   lastUpdated,
   order
 }`;
+
+export const siteContentQuery = `*[_id == "siteContent"][0]`;
+
+export const calculatorConfigQuery = `*[_id == "singleton-calculator-config"][0]`;
+
+export const allOnPageQuery = `*[_id == "allOnPage"][0]`;
